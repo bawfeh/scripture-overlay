@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0">
+
+<title>Scripture Selector</title>
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='select.css') }}">
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Scripture Selection</h1>
+
+    <div class="group">
+
+        <label>Reference</label>
+
+        <input
+            id="reference"
+            type="text"
+            value="{{ reference }}"
+            autocomplete="off">
+
+    </div>
+
+    <div class="group">
+
+        <label>Version</label>
+
+        <select id="version">
+
+            {% for code, name in versions.items() %}
+
+            <option
+                value="{{ code }}"
+                {% if code == version %}selected{% endif %}>
+
+                {{ name }} ({{ code }})
+
+            </option>
+
+            {% endfor %}
+
+        </select>
+
+    </div>
+
+    <div class="group">
+
+        <label>First Verse</label>
+    
+        <div class="verse-control">
+    
+            <button id="left-minus">
+                −
+            </button>
+    
+            <span id="first-verse">
+                1
+            </span>
+    
+            <button id="left-plus">
+                +
+            </button>
+    
+        </div>
+    
+    </div>
+    
+    
+    <div class="group">
+    
+        <label>Last Verse</label>
+    
+        <div class="verse-control">
+    
+            <button id="right-minus">
+                −
+            </button>
+    
+            <span id="last-verse">
+                6
+            </span>
+    
+            <button id="right-plus">
+                +
+            </button>
+    
+        </div>
+    
+    </div>
+
+    <div class="group">
+
+        <label>Preview</label>
+
+        <div id="preview"></div>
+
+    </div>
+
+    <button id="submit">
+
+        Update Scripture
+
+    </button>
+
+</div>
+
+<script
+src="{{ url_for('static', filename='select.js') }}">
+</script>
+
+</body>
+
+</html>
