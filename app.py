@@ -22,10 +22,10 @@ from flask import (
     request
 )
 
-from quotation_manager import QuotationManager
-from cache import PassageCache
-from biblegateway import BibleGatewayProvider
-from biblegateway import BibleGatewayError
+from quotation_manager import QuotationManager 
+from cache import PassageCache 
+from bible_provider import DEFAULT_PROVIDER 
+from bible_provider import BibleProviderError
 
 
 ###########################################################################
@@ -38,67 +38,28 @@ PORT = 8080
 
 DEBUG = False
 
-VERSIONS = {
-
-    "KJV": "King James Version",
-
-    "NKJV": "New King James Version",
-
-    "NIV": "New International Version",
-
-    "ESV": "English Standard Version",
-
-    "NASB": "New American Standard Bible",
-
-    "NLT": "New Living Translation",
-
-    "AMP": "Amplified Bible",
-
-    "CSB": "Christian Standard Bible",
-
-    "MSG": "The Message",
-
-    "GNT": "Good News Translation",
-
-    "AMP": "Amplified Bible",
-
-    "AMPC": "Amplified Bible, Classic Edition",
-
-    "HCSB": "Holman Christian Standard Bible",
-
-    "NET": "New English Translation",
-
-    "RSV": "Revised Standard Version",
-
-    "NRSV": "New Revised Standard Version",  
-
-}
-
-
 ###########################################################################
 # Initialise services
 ###########################################################################
 
-# app = Flask(__name__)
 app = Flask(
     __name__,
     template_folder="templates",
     static_folder="static"
 )
 
+from bible_provider import get_provider
+
+# provider = get_provider("olivetree")
+
 import logging
 
 # Suppress Flask's default logging to avoid cluttering the console
 logging.getLogger("werkzeug").setLevel(logging.ERROR)
 
-provider = BibleGatewayProvider()
-
 cache = PassageCache()
 
-manager = QuotationManager(
-    provider,
-    cache
-)
+manager = QuotationManager( DEFAULT_PROVIDER, cache )
 
 ###########################################################################
 # Utility
@@ -109,13 +70,28 @@ def fetch_scripture():
     """
     Returns the currently selected Scripture.
     """
+    
+    already_cached = False
 
-    passage = manager.get_passage()
+    try:
+        already_cached = manager.is_cached()
+
+        passage = manager.get_passage()
+
+    except BibleProviderError:
+        raise
 
     if passage is None:
+        raise BibleProviderError(
+            f"No Scripture available for {manager.get_reference()} "
+            f"({manager.get_version()})."
+        )
 
-        raise BibleGatewayError(
-            "No Scripture available."
+    
+    if not already_cached:
+        print(
+            f"Success! Scripture for {manager.get_reference()} "
+            f"({manager.get_version()}) fetched."
         )
 
     return passage
@@ -137,41 +113,33 @@ def home():
 
 ###########################################################################
 
-# import traceback
-
 @app.route("/scripture")
 def scripture():
 
     try:
-
         return jsonify(fetch_scripture())
 
-    except BibleGatewayError as exc:
-
+    except BibleProviderError as exc:
+        if manager.get_reference():
+            app.logger.warning("%s", exc)
         return jsonify(
             {
-                "reference": "",
-                "version": "",
+                "reference": manager.get_reference(),
+                "version": manager.get_version(),
                 "verses": [],
                 "error": str(exc)
             }
         ), 500
 
     except Exception as exc:
-
+        # app.logger.exception("Unexpected error while retrieving Scripture")
         return jsonify(
             {
-
-                "reference": "",
-
-                "version": "",
-
+                "reference": manager.get_reference(),
+                "version": manager.get_version(),
                 "verses": [],
-
                 "error": str(exc)
-
             }
-
         ), 500
 
 
@@ -227,6 +195,8 @@ def quotation():
 
     return jsonify({
 
+        "provider": manager.get_provider_name(),
+
         "reference": manager.get_reference(),
 
         "version": manager.get_version()
@@ -243,9 +213,52 @@ def shutdown():
     pass
 
 
-
-
 ############################################################################
+# Scripture selection
+############################################################################
+
+@app.route("/versions/<provider>")
+def get_versions(provider):
+
+    try:
+
+        bible_provider = get_provider(provider)
+
+        # bible_provider.APP_ROOT = f"http://localhost:{PORT}/"
+
+        return jsonify({
+
+            "success": True,
+
+            "provider": bible_provider.name,
+
+            "versions": bible_provider.get_versions(),
+
+            "default_version": bible_provider.get_default_version(),
+
+            "default_reference": bible_provider.get_default_reference()
+        })
+
+    except ValueError as error:
+
+        return jsonify({
+
+            "success": False,
+
+            "error": str(error)
+
+        }), 400
+
+    except BibleProviderError as error:
+
+        return jsonify({
+
+            "success": False,
+
+            "error": str(error)
+
+        }), 502
+    
 @app.route("/select") # GET method
 def select():
 
@@ -253,12 +266,13 @@ def select():
 
         "select.html",
 
-        versions=VERSIONS,
-
         reference=manager.get_reference(),
 
-        version=manager.get_version()
+        version=manager.get_version(),
 
+        versions=manager.get_provider_versions(),
+
+        providers=manager.get_providers()
     )
 
 @app.route("/select", methods=["POST"])
@@ -270,17 +284,15 @@ def update_selection():
 
     version = data["version"]
 
-    manager.set(
+    provider = data["provider"]
 
-        reference,
-
-        version
-
-    )
+    manager.set( provider, reference, version )
 
     return jsonify({
 
         "success": True,
+
+        "provider" : manager.get_provider_name(),
 
         "reference": manager.get_reference(),
 

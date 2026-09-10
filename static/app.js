@@ -76,8 +76,9 @@ async function updateDisplay(data)
     versionElement.textContent   = data.version;
 
     verseElement.innerHTML = "";
-
-    data.verses.slice(0, MAX_VERSES).forEach(v => {
+    
+    // data.verses.slice(0, MAX_VERSES).forEach(v => {
+    data.verses.forEach(v => {
 
         const div = document.createElement("div");
 

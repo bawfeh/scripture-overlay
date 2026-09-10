@@ -1,0 +1,78 @@
+{
+    "AMP": {
+        "id": "1588",
+        "name": "Amplified Bible (AMP)"
+    },
+    "AMPC": {
+        "id": "8",
+        "name": "Amplified Bible, Classic Edition (AMPC)"
+    },
+    "ASV": {
+        "id": "12",
+        "name": "American Standard Version (ASV)"
+    },
+    "CEV": {
+        "id": "392",
+        "name": "Contemporary English Version (CEV)"
+    },
+    "CEB": {
+        "id": "37",
+        "name": "Common English Bible (CEB)"
+    },
+    "CSB": {
+        "id": "1713",
+        "name": "Christian Standard Bible (CSB)"
+    },
+    "ESV": {
+        "id": "59",
+        "name": "English Standard Version (ESV)"
+    },
+    "GNBDK": {
+        "id": "431",
+        "name": "Good News Bible - British Catholic Edition 2017 (GNBDK)"
+    },
+    "GNTD": {
+        "id": "69",
+        "name": "Good News Translation - US Version (GNTD)"
+    },
+    "HCSB": {
+        "id": "72",
+        "name": "Holman Christian Standard Bible (HCSB)"
+    },
+    "KJV": {
+        "id": "1",
+        "name": "King James Version (KJV)"
+    },
+    "MSG": {
+        "id": "97",
+        "name": "The Message (MSG)"
+    },
+    "NIV": {
+        "id": "111",
+        "name": "New International Version (NIV)"
+    },
+    "NKJV": {
+        "id": "114",
+        "name": "New King James Version (NKJV)"
+    },
+    "NLT": {
+        "id": "116",
+        "name": "New Living Translation (NLT)"
+    },
+    "NASB1995": {
+        "id": "100",
+        "name": "New American Standard Bible - NASB 1995 (NASB1995)"
+    },
+    "NASB2020": {
+        "id": "2692",
+        "name": "New American Standard Bible - NASB (NASB2020)"
+    },
+    "NET": {
+        "id": "107",
+        "name": "New English Translation (NET)"
+    },
+    "NMV": {
+        "id": "2135",
+        "name": "New Messianic Version Bible (NMV)"
+    }
+}

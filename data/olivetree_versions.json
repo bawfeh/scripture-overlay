@@ -1,0 +1,70 @@
+[
+    {
+        "name": "American Standard Version",
+        "code": "ASV"
+    },
+    {
+        "name": "Contemporary English Version",
+        "code": "CEV"
+    },
+    {
+        "name": "Darby Translation",
+        "code": "DARBY"
+    },
+    {
+        "name": "English Standard Version",
+        "code": "ESV"
+    },
+    {
+        "name": "Expanded Bible",
+        "code": "EXB"
+    },
+    {
+        "name": "King James Version",
+        "code": "KJV"
+    },
+    {
+        "name": "Louis Segond",
+        "code": "LSG"
+    },
+    {
+        "name": "New American Standard Bible",
+        "code": "NASB"
+    },
+    {
+        "name": "New Century Version",
+        "code": "NCV"
+    },
+    {
+        "name": "New King James Version",
+        "code": "NKJV"
+    },
+    {
+        "name": "New International Version",
+        "code": "NIV"
+    },
+    {
+        "name": "Nueva Versi\u00f3n Internacional",
+        "code": "NVI"
+    },
+    {
+        "name": "Reina-Valera 1960",
+        "code": "RVR1960"
+    },
+    {
+        "name": "SBL Greek New Testament",
+        "code": "SBLGNT"
+    },
+    {
+        "name": "1894 Scrivener New Testament",
+        "code": "TR1894"
+    },
+    {
+        "name": "Voice Bible",
+        "code": "VOICE"
+    },
+    {
+        "name": "Young's Literal Translation",
+        "code": "YLT"
+    }
+]

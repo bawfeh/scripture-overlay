@@ -1,133 +1,182 @@
 """
 quotation_manager.py
 
-Maintains the currently selected Scripture.
-
-Responsibilities
-----------------
-1. Store the current reference and version.
-2. Retrieve passages using the cache.
-3. Keep the current passage in memory.
-4. Provide thread-safe access.
+Manages the currently selected Bible provider, reference,
+and Bible version.
 """
 
-from threading import Lock
-
-
-###########################################################################
+from bible_provider import (
+    get_provider,
+    BibleProviderError
+)
 
 
 class QuotationManager:
 
     def __init__(
-        self,
-        provider,
-        cache,
-        reference="John 3:16",
-        version="KJV"
+        self, provider, cache
     ):
-
-        self.provider = provider
 
         self.cache = cache
 
-        self.lock = Lock()
+        #
+        # The provider argument may be either:
+        #
+        #     "biblegateway"
+        #
+        # or an already-created provider object.
+        #
+        if isinstance(provider, str):
 
-        self.reference = reference.strip()
+            self.provider = get_provider( provider )
 
-        self.version = version.strip().upper()
+        else:
 
-        self.passage = None
+            self.provider = provider
 
-        self._load_passage()
+        self.reference = ""
+
+        self.version = ""
+
+    ##################################################################
+
+    def set( self, provider, reference, version ):
+
+        """
+        Set the current provider, Scripture reference,
+        and Bible version.
+        """
+
+        #
+        # Normalize input
+        #
+
+        provider = provider.strip().lower()
+
+        reference = reference.strip()
+
+        version = version.strip().upper()
+
+        #
+        # Create the requested provider.
+        #
+
+        self.provider = get_provider( provider )
+
+        #
+        # Store the selected Scripture.
+        #
+
+        self.reference = reference
+
+        self.version = version
+
+    ##################################################################
+
+    def get_provider(self):
+
+        """
+        Return the current provider object.
+        """
+
+        return self.provider
+
+    ##################################################################
+
+    def get_provider_name(self):
+
+        """
+        Return the name of the current provider.
+        """
+
+        return self.provider.name
 
     #######################################################################
 
-    def _load_passage(self):
+    def get_provider_versions(self):
 
-        """
-        Loads the current passage.
-        Uses the cache whenever possible.
-        """
-
-        cached = self.cache.get( self.reference, self.version )
-
-        if cached is not None:
-
-            self.passage = cached
-
-            return
-
-        passage = self.provider.get_passage(
-            self.reference,
-            self.version
-        )
-
-        self.cache.put( self.reference, self.version, passage )
-
-        self.passage = passage
+        return self.provider.get_versions()
 
     #######################################################################
 
-    def set( self, reference, version ):
+    def get_providers(self):
 
-        """
-        Changes the current quotation.
-        """
+        return self.provider.PROVIDERS
 
-        with self.lock:
-
-            reference = reference.strip()
-
-            version = version.strip().upper()
-
-            if (
-                reference == self.reference
-                and
-                version == self.version
-            ):
-                return
-
-            self.reference = reference
-
-            self.version = version
-
-            self._load_passage()
-
-    #######################################################################
+    ##################################################################
 
     def get_reference(self):
 
-        with self.lock:
+        return self.reference
 
-            return self.reference
-
-    #######################################################################
+    ##################################################################
 
     def get_version(self):
 
-        with self.lock:
+        return self.version
 
-            return self.version
+    ##################################################################
 
-    #######################################################################
+    def is_cached(self):
+        """
+        Checks if the managed reference, version, and provider name 
+        are already in the cache memory
+        """
+        # generate lowercase tuple
+        key = self.cache._key( self.provider.name, self.reference, self.version )
+
+        return (key in self.cache._cache)
 
     def get_passage(self):
 
-        with self.lock:
-
-            return self.passage
-
-    #######################################################################
-
-    def refresh(self):
-
         """
-        Forces a reload from BibleGateway.
+        Return the currently selected Scripture.
+
+        The cache is keyed by:
+
+            provider
+            reference
+            version
+
+        so the same Scripture/version can safely exist in the
+        cache for multiple providers.
         """
 
-        with self.lock:
+        if not self.reference:
 
-            self.cache.remove( self.reference, self.version )
+            return None
 
-            self._load_passage()
+        if not self.version:
+
+            return None
+
+        provider = self.provider.name
+
+        #
+        # Look in the cache first.
+        #
+
+        passage = self.cache.get( provider, self.reference, self.version )
+
+        if passage is not None:
+
+            return passage
+
+        #
+        # Retrieve from provider.
+        #
+
+        try:
+
+            passage = self.provider.get_passage( self.reference, self.version )
+
+        except Exception as e:
+            raise e
+
+        #
+        # Store in cache.
+        #
+
+        self.cache.put( provider, self.reference, self.version, passage )
+
+        return passage

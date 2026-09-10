@@ -19,9 +19,11 @@ class PassageCache:
 
     ##############################################################
 
-    def _key(self, reference, version):
+    def _key(self, provider, reference, version):
 
         return (
+
+            provider.strip().lower(),
 
             reference.strip().lower(),
 
@@ -32,9 +34,9 @@ class PassageCache:
 
     ##############################################################
 
-    def get( self, reference, version ):
+    def get( self, provider, reference, version ):
 
-        key = self._key( reference, version )
+        key = self._key( provider, reference, version )
 
         if key not in self._cache:
 
@@ -56,9 +58,9 @@ class PassageCache:
 
     ##############################################################
 
-    def put( self, reference, version, passage ):
+    def put( self, provider, reference, version, passage ):
 
-        key = self._key( reference, version )
+        key = self._key( provider, reference, version )
 
 
         self._cache[key] = {
@@ -72,9 +74,9 @@ class PassageCache:
 
     ##############################################################
 
-    def remove( self, reference, version ):
+    def remove( self, provider, reference, version ):
 
-        key = self._key( reference, version )
+        key = self._key( provider, reference, version )
 
         self._cache.pop( key, None )
 

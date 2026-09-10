@@ -1,21 +1,13 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
-
 <meta charset="UTF-8">
-
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Scripture Selector</title>
 
-<link
-    rel="stylesheet"
-    href="{{ url_for('static', filename='select.css') }}">
-
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='select.css') }}">
 </head>
 
 <body>
@@ -26,103 +18,78 @@
 
     <div class="group">
 
-        <label>Reference</label>
-
-        <input
-            id="reference"
-            type="text"
-            value="{{ reference }}"
-            autocomplete="off">
-
+        <label>Provider</label>
+    
+        <select id="provider">
+    
+            {% for name, label in providers.items() %}
+    
+            <option
+                value="{{ name }}"
+                {% if name == provider %}selected{% endif %}>
+    
+                {{ label }}
+    
+            </option>
+    
+            {% endfor %}
+    
+        </select>
+    
     </div>
 
     <div class="group">
+        <label>Reference</label>
+    
+        <input id="reference"
+               type="text"
+               value="{{ reference }}"
+               autocomplete="off">
+    
+        <div class="range-control">
+            <button id="range-left" type="button">&lt;&lt;</button>
+            <button id="range-right" type="button">&gt;&gt;</button>
+        </div>
+    </div>
 
+    <div class="group">
         <label>Version</label>
 
-        <select id="version">
-
-            {% for code, name in versions.items() %}
-
-            <option
-                value="{{ code }}"
-                {% if code == version %}selected{% endif %}>
-
-                {{ name }} ({{ code }})
-
-            </option>
-
-            {% endfor %}
-
-        </select>
-
+        <select id="version"></select>
     </div>
 
     <div class="group">
-
         <label>First Verse</label>
-    
+
         <div class="verse-control">
-    
-            <button id="left-minus">
-                −
-            </button>
-    
-            <span id="first-verse">
-                1
-            </span>
-    
-            <button id="left-plus">
-                +
-            </button>
-    
+            <button id="left-minus" type="button">-</button>
+            <span id="first-verse">1</span>
+            <button id="left-plus" type="button">+</button>
         </div>
-    
     </div>
-    
-    
+
     <div class="group">
-    
         <label>Last Verse</label>
-    
+
         <div class="verse-control">
-    
-            <button id="right-minus">
-                −
-            </button>
-    
-            <span id="last-verse">
-                6
-            </span>
-    
-            <button id="right-plus">
-                +
-            </button>
-    
+            <button id="right-minus" type="button">-</button>
+            <span id="last-verse">6</span>
+            <button id="right-plus" type="button">+</button>
         </div>
-    
     </div>
 
     <div class="group">
-
         <label>Preview</label>
-
         <div id="preview"></div>
-
     </div>
 
-    <button id="submit">
-
+    <button id="submit" type="button">
         Update Scripture
-
     </button>
 
 </div>
 
-<script
-src="{{ url_for('static', filename='select.js') }}">
-</script>
+<script src="{{ url_for('static', filename='select.js') }}"></script>
 
 </body>
-
 </html>

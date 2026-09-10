@@ -1,0 +1,20 @@
+
+services:
+
+  bible-app:
+
+    build: .
+
+    ports:
+      - "8080:8080"
+
+    volumes:
+      - ./data:/app/data
+      - ./static:/app/static
+      - ./templates:/app/templates
+      - ./debug:/app/debug
+
+    restart: unless-stopped
+
+    env_file:
+      - .env

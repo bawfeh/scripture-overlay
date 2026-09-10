@@ -18,41 +18,39 @@ returns
 
 """
 
-from multiprocessing.util import DEBUG
+# from multiprocessing.util import DEBUG
+# import re            
+import json
 import re
 from urllib.parse import urlencode
 from pathlib import Path
 
-import requests
 from bs4 import BeautifulSoup
 
+from bible_provider import BibleProvider
+from bible_provider import BibleProviderError
 
-class BibleGatewayError(Exception):
+
+class BibleGatewayError(BibleProviderError):
     """Raised when a passage cannot be retrieved."""
     pass
 
-
-class BibleGatewayProvider:
+class BibleGatewayProvider(BibleProvider):
+    
+    name = "biblegateway"
+    label = "BibleGateway"
 
     BASE_URL = "https://www.biblegateway.com/passage/"
 
-    USER_AGENT = (
-        "Mozilla/5.0 "
-        "(Macintosh; Intel Mac OS X 10_15_7) "
-        "AppleWebKit/537.36 "
-        "(KHTML, like Gecko) "
-        "Chrome/138.0 Safari/537.36"
-    )
+    DEBUG_FILE = f"debug/debug_{name}.html"
 
-    def __init__(self, timeout=20):
+    # DEFAULT_REFERENCE = "John 3:16"
 
-        self.timeout = timeout
+    # DEFAULT_VERSION = "KJV"
 
-        self.session = requests.Session()
+    VERSIONS_URL = "https://www.biblegateway.com/versions/"
 
-        self.session.headers.update({
-            "User-Agent": self.USER_AGENT
-        })
+    VERSIONS_LOCATION = f"data/{name}_versions.json"
 
     ##################################################################
 
@@ -65,86 +63,38 @@ class BibleGatewayProvider:
 
         return f"{self.BASE_URL}?{query}"
 
-
     ##################################################################
 
-    def initial_verse(self, reference):
-        """
-        Returns the first verse number contained in a Scripture reference.
-
-        Examples
-        --------
-        Matthew 3               -> 1
-        Matthew 3:1             -> 1
-        Matthew 3:1-5           -> 1
-        Matthew 3:15-17         -> 15
-        John 3:16              -> 16
-        Romans 8:28-39         -> 28
-        1 Corinthians 13       -> 1
-        1 Corinthians 13:4-8   -> 4
-
-        If no verse is present, returns 1.
-        """
-
-        reference = reference.strip()
-
-        #
-        # Look for ":<verse>"
-        #
-
-        match = re.search(r":\s*(\d+)", reference)
-
-        if match:
-
-            return int(match.group(1))
-
-        #
-        # Chapter only
-        #
-
-        return 1
-
-    ##################################################################
-
-    def fetch_html(self, reference, version):
-
-        url = self.build_url(reference, version)
-
-        print("Fetching:", url)
-
-        response = self.session.get(url, timeout=self.timeout)
-
-        print("Status:", response.status_code)
-        print("Final URL:", response.url)
-
-        html = response.text
-
-        Path("debug/last_response.html").write_text(
-            html,
-            encoding="utf-8"
-        )
-
-        return html
-
-    ##################################################################
-
-    def parse_html(self, html, reference):
+    def parse_html(self, html, reference, version = None):
 
         soup = BeautifulSoup(html, "lxml")
 
-
         normalized_reference = ""
+
+        MSG = version and version.lower() == "msg"
 
         meta = soup.find("meta", property="og:title")
 
         if meta:
+            
             content = meta["content"]
             normalized_reference = content.replace("Bible Gateway passage: ", "").split(" - ")[0]
+
+        else:
+
+            book, _, _, _ = self.parse_reference(reference)
+            normalized_book = self.get_book_name(book)
+            if normalized_book is not None:
+                normalized_reference = reference.replace(book, normalized_book)
 
         passage = soup.select_one("div.passage-content")
 
         if passage is None:
-            raise BibleGatewayError("Unable to locate passage.")
+            raise BibleGatewayError(
+                "Unable to locate passage for "
+                f"{normalized_reference or reference} "
+                f"({version})"
+            )
 
         std_text = (
             passage.select_one("div.std-text")
@@ -152,7 +102,11 @@ class BibleGatewayProvider:
         )
 
         if std_text is None:
-            raise BibleGatewayError("Unable to locate Scripture text.")
+            raise BibleGatewayError(
+                "Unable to locate Scripture text for "
+                f"{normalized_reference or reference} "
+                f"({version})!"
+            )
 
         #
         # Remove unwanted elements
@@ -189,11 +143,16 @@ class BibleGatewayProvider:
 
         current_text = []
 
+        verse_counter = 0
+
         #
-        # Iterate over every verse span
+        # Iterate over every verse span until we reach the maximum number of verses
         #
 
         for span in std_text.select("span.text"):
+
+            if verse_counter >= self.MAX_VERSES:
+                break
 
             #
             # Does this span begin with a verse number?
@@ -211,6 +170,17 @@ class BibleGatewayProvider:
 
                 text = " ".join(text.split())
 
+                # 
+                # Clean up the text from cross-references like [a], [b], (A), (B),
+                # ... that are not part of the verse text.
+                #
+                cross_references = re.findall(r"(\[\s*[a-z]\s*\]|\(\s*[A-Z]\s*\))", text)
+
+                if cross_references:
+
+                    for match in cross_references:
+                        text = text.replace(match, "").strip() 
+
                 if text:
 
                     verses.append({
@@ -221,8 +191,13 @@ class BibleGatewayProvider:
 
                     })
 
-                current_number = int(
-                    verse_number.get_text(strip=True)
+                    verse_counter = len(verses)
+
+                verse_number_value = verse_number.get_text(strip=True)
+                
+                current_number = (verse_number_value 
+                    if ('-' in verse_number_value) 
+                    else int( verse_number_value )
                 )
 
                 verse_number.decompose()
@@ -248,7 +223,7 @@ class BibleGatewayProvider:
         # Store last verse
         #
 
-        if current_number is not None:
+        if current_number is not None and verse_counter < self.MAX_VERSES:
 
             text = " ".join(current_text).strip()
 
@@ -261,30 +236,88 @@ class BibleGatewayProvider:
                 }
             )
 
+        if not verses:
+            raise BibleGatewayError(
+                "Unable to locate Scripture text for "
+                f"{normalized_reference or reference} "
+                f"({version})!"
+            )
+
+        # Impose a cut-off on the number of verses to output
+
+        reference, cut_off = self.output_ref(
+            normalized_reference or reference, 
+            verses, MSG
+        )
+
+
         return {
 
-            "verses": verses,
+            "verses": verses[:cut_off],
 
-            "reference": normalized_reference or reference
+            "reference": reference,
 
         }
+
 
     ##################################################################
 
-    def get_passage(self, reference, version):
+    def get_versions(self):
+        """
+        Returns a list of available Bible versions 
+        First scrapes the versions from the BibleGateway website and then validates them against the VERSIONS dictionary."""
 
-        print(f"Retrieving passage: {reference} ({version})")
+        # Read the versions from the VERSIONS_LOCATION file if it exists
 
-        html = self.fetch_html( reference,   version )
+        try:
+            with open(self.VERSIONS_LOCATION, "r") as f:
 
-        parsed = self.parse_html(html, reference)
+                versions = json.load(f)
 
-        return {
+                return self.validate_versions(versions)
 
-            "reference": parsed["reference"],
+        except FileNotFoundError:
 
-            "version": version,
+            pass
 
-            "verses": parsed["verses"]
+        response = self.session.get( self.VERSIONS_URL, timeout=self.timeout )
 
-        }
+        if response.status_code != 200:
+            raise BibleGatewayError(
+                f"Unable to retrieve versions. "
+                f"Status code: {response.status_code}"
+            )
+
+        soup = BeautifulSoup( response.text, "lxml" )
+
+        versions = []
+
+        for option in soup.select( 'select[name="version"] option' ):
+
+            code = option.get("value")
+
+            name = option.get_text( " ", strip=True )
+
+            if not code or not name:
+                continue
+
+            # Ignore language headings and spacers
+            if option.get("class"):
+                if "lang" in option["class"]:
+                    continue
+
+                if "spacer" in option["class"]:
+                    continue
+
+            versions.append({ "name": name, "code": code })
+
+        # Save the versions to a VERSIONS_LOCATION file in json format for future use
+
+        with open(Path(self.VERSIONS_LOCATION), "w") as f:
+
+            json.dump(versions, f, indent=4)
+
+        return self.validate_versions(versions)
+
+
+    ##################################################################
