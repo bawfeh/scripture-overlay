@@ -10,10 +10,7 @@ The application can be run directly with Python or as a **Docker container**.
 
 * 📖 **Multiple Scripture providers**
 
-  * [BibleGateway](https://www.biblegateway.com/)
-  * [Bible.com](https://www.bible.com/)
-  * Olive Tree
-  * AI Bible provider
+  * [BibleGateway](https://www.biblegateway.com/), [Bible.com](https://www.bible.com/), Olive Tree, AI Bible Bot
 * 🔎 Flexible Bible-reference parsing
 * 📚 Bible-book aliases and canonical book-name normalization
 * 🎛️ Improved Scripture selection interface
@@ -69,11 +66,7 @@ The application separates Scripture retrieval from the presentation layer throug
        │ BibleGateway │     │  Bible.com   │     │ Olive Tree   │
        └──────────────┘     └──────────────┘     └──────────────┘
                                     │
-                                    ▼
-                           ┌─────────────────┐
-                           │    AI Bible     │
-                           │    Provider     │
-                           └─────────────────┘
+                                    
 
                                     │
                                     ▼
@@ -124,7 +117,7 @@ The Olive Tree provider allows Scripture to be retrieved from an installed/local
 
 This makes it possible to use locally available Bible content rather than relying exclusively on web retrieval.
 
-## AI Bible
+## AI Bible Bot
 
 The AI provider uses an OpenAI-compatible client configured to communicate with **OpenRouter**.
 
