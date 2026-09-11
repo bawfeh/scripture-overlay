@@ -10,7 +10,7 @@ The application can be run directly with Python or as a **Docker container**.
 
 * 📖 **Multiple Scripture providers**
 
-  * [BibleGateway](https://www.biblegateway.com/), [Bible.com](https://www.bible.com/), Olive Tree, AI Bible Bot
+  * [BibleGateway](https://www.biblegateway.com/), [Bible.com](https://www.bible.com/), [Olive Tree](https://www.olivetree.com/bible), [AI Bible Bot](https://openrouter.ai/)
 * 🔎 Flexible Bible-reference parsing
 * 📚 Bible-book aliases and canonical book-name normalization
 * 🎛️ Improved Scripture selection interface
