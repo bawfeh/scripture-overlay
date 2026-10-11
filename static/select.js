@@ -210,6 +210,17 @@ async function loadVersions(provider)
 
 //////////////////////////////////////////////////////////////////////
 
+function applyDefaultSelection()
+{
+    providerBox.value = "BibleGateway";
+    referenceBox.value = "John 3:16";
+    versionBox.value = "KJV";
+
+    refreshVerseNumbers();
+}
+
+//////////////////////////////////////////////////////////////////////
+
 providerBox.onchange = async function()
 {
     await loadVersions(providerBox.value);
@@ -305,16 +316,116 @@ submit.onclick = async function()
 
 async function initialise()
 {
-    refreshVerseNumbers();
-
-    providerBox.value = initialProvider;
-
-    await loadVersions(
-        initialProvider,
-        initialVersion
-    );
+    await loadVersions("BibleGateway");
+    applyDefaultSelection();
 
     updatePreview();
 }
 
 initialise();
+
+//////////////////////////////////////////////////////////////////////
+
+
+/***************************************************************
+ * Scene selection
+ ***************************************************************/
+
+const sceneBox = document.getElementById("scene");
+const scenePreview = document.getElementById("scene-preview");
+const applySceneButton = document.getElementById("apply-scene");
+const sceneStatus = document.getElementById("scene-status");
+
+const sceneUrls = new Map();
+
+function updateScenePreview() {
+    const url = sceneUrls.get(sceneBox.value);
+
+    scenePreview.hidden = !url;
+
+    if (url) {
+        scenePreview.src = url;
+    }
+}
+
+async function loadScenes() {
+    try {
+        const response = await fetch("/scenes", {
+            cache: "no-store"
+        });
+
+        if (!response.ok) {
+            throw new Error("Unable to load scenes.");
+        }
+
+        const data = await response.json();
+
+        sceneBox.replaceChildren();
+        sceneUrls.clear();
+
+        for (const scene of data.scenes) {
+            sceneUrls.set(scene.name, scene.url);
+
+            const option = document.createElement("option");
+            option.value = scene.name;
+            option.textContent = scene.name;
+
+            sceneBox.appendChild(option);
+        }
+
+        if (data.selected) {
+            sceneBox.value = data.selected;
+        }
+
+        applySceneButton.disabled = data.scenes.length === 0;
+
+        if (!data.scenes.length) {
+            sceneStatus.textContent = "No background images found.";
+        }
+
+        updateScenePreview();
+    } catch (error) {
+        console.error(error);
+        sceneStatus.textContent = error.message;
+    }
+}
+
+sceneBox.addEventListener("change", () => {
+    sceneStatus.textContent = "";
+    updateScenePreview();
+});
+
+applySceneButton.addEventListener("click", async () => {
+    if (!sceneBox.value) return;
+
+    applySceneButton.disabled = true;
+    sceneStatus.textContent = "Applying scene...";
+
+    try {
+        const response = await fetch("/scene", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                scene: sceneBox.value
+            })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || "Scene update failed.");
+        }
+
+        sceneStatus.textContent =
+            `Active background: ${result.scene}`;
+    } catch (error) {
+        console.error(error);
+        sceneStatus.textContent = error.message;
+    } finally {
+        applySceneButton.disabled = false;
+    }
+});
+
+loadScenes();

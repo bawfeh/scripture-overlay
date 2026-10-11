@@ -109,3 +109,31 @@ select:disabled {
     height: 6vh;
     font-size: var(--button-size);
 }
+
+
+#scene-preview {
+    display: block;
+    width: 100%;
+    max-height: 220px;
+    object-fit: contain;
+    margin-top: 12px;
+    border-radius: 8px;
+    background: #111;
+}
+
+#scene-preview[hidden] {
+    display: none;
+}
+
+#apply-scene {
+    width: 100%;
+    height: var(--control-height);
+    margin-top: 12px;
+    font-size: var(--button-size);
+    cursor: pointer;
+}
+
+#scene-status {
+    margin-top: 10px;
+    font-size: var(--label-size);
+}

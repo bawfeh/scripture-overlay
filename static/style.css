@@ -30,7 +30,8 @@ body{
 ---------------------------------------------*/
 
 body{
-    background-image: url("/static/images/background3.jpg");
+    background-image: none;
+    /* background-image: url("/static/images/background3.jpg"); */
     /* background-image:
 
         linear-gradient(

@@ -19,8 +19,12 @@ from flask import (
     Flask,
     jsonify,
     render_template,
-    request
+    request,
+    url_for
 )
+
+import json
+import threading
 
 from quotation_manager import QuotationManager 
 from cache import PassageCache 
@@ -298,6 +302,102 @@ def update_selection():
 
         "version": manager.get_version()
 
+    })
+
+
+SCENE_DIR = Path(app.static_folder) / "images"
+SCENE_FILE = Path(app.root_path) / "data" / "scene.json"
+SCENE_EXTENSIONS = {
+    ".png", 
+    ".jpg", 
+    ".jpeg", 
+    ".webp", 
+    ".gif",
+    ".avif"
+}
+scene_lock = threading.Lock()
+
+
+def available_scenes():
+    if not SCENE_DIR.is_dir():
+        return []
+
+    return sorted(
+        [
+            p.name for p in SCENE_DIR.iterdir()
+            if p.is_file()
+            and p.suffix.lower() in SCENE_EXTENSIONS
+        ],
+        key=str.casefold
+    )
+
+
+def current_scene():
+    scenes = available_scenes()
+
+    if not scenes:
+        return None
+
+    try:
+        saved = json.loads(
+            SCENE_FILE.read_text(encoding="utf-8")
+        ).get("scene")
+    except (OSError, ValueError, TypeError, AttributeError):
+        saved = None
+
+    return saved if saved in scenes else scenes[0]
+
+
+@app.get("/scenes")
+def get_scenes():
+    scenes = available_scenes()
+
+    return jsonify({
+        "scenes": [
+            {
+                "name": name,
+                "url": url_for(
+                    "static",
+                    filename=f"images/{name}"
+                )
+            }
+            for name in scenes
+        ],
+        "selected": current_scene()
+    })
+
+
+@app.get("/scene")
+def get_scene():
+    return jsonify({
+        "scene": current_scene()
+    })
+
+
+@app.post("/scene")
+def set_scene():
+    payload = request.get_json(silent=True) or {}
+    name = payload.get("scene")
+
+    if not isinstance(name, str) or name not in available_scenes():
+        return jsonify({
+            "success": False,
+            "error": "Invalid or unavailable scene."
+        }), 400
+
+    with scene_lock:
+        SCENE_FILE.parent.mkdir(parents=True, exist_ok=True)
+
+        temp_file = SCENE_FILE.with_suffix(".tmp")
+        temp_file.write_text(
+            json.dumps({"scene": name}),
+            encoding="utf-8"
+        )
+        temp_file.replace(SCENE_FILE)
+
+    return jsonify({
+        "success": True,
+        "scene": name
     })
 
 ###########################################################################

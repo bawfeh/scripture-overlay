@@ -149,15 +149,68 @@ async function fetchScripture()
 }
 
 
+/***************************************************************
+ * Dynamic background scene
+ ***************************************************************/
+
+let activeScene = null;
+
+async function fetchScene() {
+    try {
+        const response = await fetch("/scene", {
+            cache: "no-store"
+        });
+
+        if (!response.ok) {
+            throw new Error("Unable to retrieve scene.");
+        }
+
+        const data = await response.json();
+
+        if (data.scene === activeScene) return;
+
+        if (data.scene) {
+            const imageUrl =
+                `/static/images/${encodeURIComponent(data.scene)}`;
+
+            // Preload before changing the live background.
+            const image = new Image();
+            image.src = imageUrl;
+
+            await image.decode();
+
+            document.body.style.backgroundImage =
+                `url("${imageUrl}")`;
+        } else {
+            document.body.style.backgroundImage = "none";
+        }
+
+        activeScene = data.scene;
+    } catch (error) {
+        console.error("Scene update failed:", error);
+    }
+}
+
 /**********************************************************************
  * Initialisation
  **********************************************************************/
 
+// async function initialise()
+// {
+//     await fetchScripture();
+
+//     setInterval(fetchScripture, POLL_INTERVAL);
+// }
+
 async function initialise()
 {
-    await fetchScripture();
+    await Promise.all([
+        fetchScripture(),
+        fetchScene()
+    ]);
 
     setInterval(fetchScripture, POLL_INTERVAL);
+    setInterval(fetchScene, POLL_INTERVAL);
 }
 
 
