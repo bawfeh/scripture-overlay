@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import re
 import json
 from pathlib import Path
-
+import config
 import requests
 
 # from olivetree import OliveTreeError
@@ -20,29 +20,17 @@ class BibleProvider(ABC):
     name = "unknown"
     label = "Unknown Provider"
 
-    USER_AGENT = (
-        "Mozilla/5.0 "
-        "(Macintosh; Intel Mac OS X 10_15_7) "
-        "AppleWebKit/537.36 "
-        "(KHTML, like Gecko) "
-        "Chrome/138.0 Safari/537.36"
-    )
-    
+    USER_AGENT = config.USER_AGENT
 
-    PROVIDERS = {
-        "biblegateway": "BibleGateway",
-        "olivetree": "Olive Tree",
-        "biblecom": "Bible.com",
-        "aibible": "AI Bot"
-    }
+    PROVIDERS = config.PROVIDERS
 
-    DEBUG_FILE = "debug/debug.html"
+    DEBUG_FILE = config.DEBUG_FILE
 
-    DEFAULT_REFERENCE = "John 3:16"
+    DEFAULT_REFERENCE = config.DEFAULT_REFERENCE
 
-    DEFAULT_VERSION = "KJV"
+    DEFAULT_VERSION = config.DEFAULT_VERSION
 
-    MAX_VERSES = 4 # max. number of verses to fetch
+    MAX_VERSES = config.MAX_VERSES
 
     BIBLE_BOOK_ALIASES_FILE = Path("data/bible_book_aliases.json")
 
@@ -50,9 +38,13 @@ class BibleProvider(ABC):
 
     ##################################################################
 
-    def __init__(self, timeout=20):
+    def __init__(self, timeout=None):
 
-        self.timeout = timeout
+        self.timeout = (
+            config.REQUEST_TIMEOUT
+            if timeout is None
+            else timeout
+        )
 
         self.session = requests.Session()
 
@@ -463,7 +455,7 @@ class BibleProvider(ABC):
     ##################################################################
 
 
-DEFAULT_PROVIDER = "biblegateway"
+DEFAULT_PROVIDER = config.DEFAULT_PROVIDER
 
 
 def get_provider(name=DEFAULT_PROVIDER):

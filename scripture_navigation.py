@@ -1,13 +1,7 @@
-
 import json
 import threading
-from pathlib import Path
 
-NAV_FILE = (
-    Path(__file__).resolve().parent
-    / "data"
-    / "scripture_navigation.json"
-)
+from config import NAV_FILE
 
 _lock = threading.RLock()
 

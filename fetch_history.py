@@ -12,8 +12,7 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-
-HISTORY_FILE = Path(__file__).resolve().parent.joinpath("data", "scripture_history.json")
+from config import HISTORY_FILE
 
 TIMEZONE = ZoneInfo("Europe/Oslo")
 

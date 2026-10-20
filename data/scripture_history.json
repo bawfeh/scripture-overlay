@@ -404,5 +404,19 @@
         "reference": "phil 4:18",
         "version": "KJV",
         "time": "2026-10-20T01:14:44.570557+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "col 3",
+        "version": "KJV",
+        "time": "2026-10-20T14:44:35.353007+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "col 3",
+        "version": "KJV",
+        "time": "2026-10-20T15:27:51.924468+02:00"
     }
 ]

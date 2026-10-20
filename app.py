@@ -25,26 +25,16 @@ from flask import (
 
 import json
 import threading
-
 from quotation_manager import QuotationManager 
 from cache import PassageCache 
 from bible_provider import DEFAULT_PROVIDER 
 from bible_provider import BibleProviderError
-
+from bible_provider import get_provider
+import logging
+import config
 from fetch_history import save_scripture_history
-
 import scripture_navigation as navigation
 
-
-###########################################################################
-# Configuration
-###########################################################################
-
-HOST = "0.0.0.0"
-
-PORT = 8080
-
-DEBUG = False
 
 ###########################################################################
 # Initialise services
@@ -52,28 +42,112 @@ DEBUG = False
 
 app = Flask(
     __name__,
-    template_folder="templates",
-    static_folder="static"
+    template_folder=str(config.TEMPLATE_DIR),
+    static_folder=str(config.STATIC_DIR)
 )
 
-from bible_provider import get_provider
+# Configure Werkzeug HTTP request logging
+logging.getLogger("werkzeug").setLevel(
+    getattr(logging, config.WERKZEUG_LOG_LEVEL, logging.ERROR)
+)
 
-# provider = get_provider("olivetree")
-
-import logging
-
-# Suppress Flask's default logging to avoid cluttering the console
-logging.getLogger("werkzeug").setLevel(logging.ERROR)
+# Configure application logging
+app.logger.setLevel(
+    getattr(logging, config.LOG_LEVEL, logging.INFO)
+)
 
 cache = PassageCache()
 
-manager = QuotationManager( DEFAULT_PROVIDER, cache )
+manager = QuotationManager(config.DEFAULT_PROVIDER, cache)
 
 scripture_lock = threading.RLock()
+
+SCENE_DIR = config.SCENE_DIR
+SCENE_FILE = config.SCENE_FILE
+SCENE_EXTENSIONS = config.SCENE_EXTENSIONS
+scene_lock = threading.Lock()
 
 ###########################################################################
 # Utility
 ###########################################################################
+
+def available_scenes():
+    if not SCENE_DIR.is_dir():
+        return []
+
+    return sorted(
+        [
+            p.name for p in SCENE_DIR.iterdir()
+            if p.is_file()
+            and p.suffix.lower() in SCENE_EXTENSIONS
+        ],
+        key=str.casefold
+    )
+
+
+def current_scene():
+    scenes = available_scenes()
+
+    if not scenes:
+        return None
+
+    try:
+        saved = json.loads(
+            SCENE_FILE.read_text(encoding="utf-8")
+        ).get("scene")
+    except (OSError, ValueError, TypeError, AttributeError):
+        saved = None
+
+    return saved if saved in scenes else scenes[0]
+
+
+def restore_last_scripture():
+    """
+    Restore the active Scripture selection from persistent
+    navigation history when the application starts.
+
+    Scripture text is retrieved lazily by /scripture.
+    """
+
+    try:
+        state = navigation.status()
+        entry = state.get("current")
+
+        if not entry:
+            app.logger.info(
+                "No previous Scripture selection to restore."
+            )
+            return False
+
+        provider = entry["provider"]
+        reference = entry["reference"]
+        version = entry["version"]
+
+        with scripture_lock:
+            manager.set(
+                provider,
+                reference,
+                version
+            )
+
+        app.logger.info(
+            "Restored Scripture selection: %s (%s), provider=%s",
+            reference,
+            version,
+            provider
+        )
+
+        return True
+
+    except Exception:
+        app.logger.exception(
+            "Unable to restore previous Scripture selection."
+        )
+        return False
+
+
+restore_last_scripture()
+
 
 def fetch_scripture():
 
@@ -106,6 +180,11 @@ def fetch_scripture():
         )
 
     return passage
+
+
+def shutdown():
+
+    pass
 
 
 ###########################################################################
@@ -319,15 +398,6 @@ def quotation():
     })
 
 
-###########################################################################
-# Shutdown
-###########################################################################
-
-def shutdown():
-
-    pass
-
-
 ############################################################################
 # Scripture selection
 ############################################################################
@@ -462,50 +532,6 @@ def update_selection():
         })
 
 
-
-SCENE_DIR = Path(app.static_folder) / "images"
-SCENE_FILE = Path(app.root_path) / "data" / "scene.json"
-SCENE_EXTENSIONS = {
-    ".png", 
-    ".jpg", 
-    ".jpeg", 
-    ".webp", 
-    ".gif",
-    ".avif"
-}
-scene_lock = threading.Lock()
-
-
-def available_scenes():
-    if not SCENE_DIR.is_dir():
-        return []
-
-    return sorted(
-        [
-            p.name for p in SCENE_DIR.iterdir()
-            if p.is_file()
-            and p.suffix.lower() in SCENE_EXTENSIONS
-        ],
-        key=str.casefold
-    )
-
-
-def current_scene():
-    scenes = available_scenes()
-
-    if not scenes:
-        return None
-
-    try:
-        saved = json.loads(
-            SCENE_FILE.read_text(encoding="utf-8")
-        ).get("scene")
-    except (OSError, ValueError, TypeError, AttributeError):
-        saved = None
-
-    return saved if saved in scenes else scenes[0]
-
-
 @app.get("/scenes")
 def get_scenes():
     scenes = available_scenes()
@@ -565,31 +591,19 @@ if __name__ == "__main__":
     try:
 
         print()
-
         print("--------------------------------------------")
-
-        print("Scripture Overlay Backend")
-
+        print(config.APP_NAME)
         print("--------------------------------------------")
-
         print()
-
-        print(f"Host      : {HOST}")
-
-        print(f"Port      : {PORT}")
-
+        print(f"Host      : {config.HOST}")
+        print(f"Port      : {config.PORT}")
         print()
-
+        
         app.run(
-
-            host=HOST,
-
-            port=PORT,
-
-            debug=DEBUG,
-
-            threaded=True
-
+            host=config.HOST,
+            port=config.PORT,
+            debug=config.DEBUG,
+            threaded=config.THREADED
         )
 
     finally:
