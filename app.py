@@ -31,6 +31,10 @@ from cache import PassageCache
 from bible_provider import DEFAULT_PROVIDER 
 from bible_provider import BibleProviderError
 
+from fetch_history import save_scripture_history
+
+import scripture_navigation as navigation
+
 
 ###########################################################################
 # Configuration
@@ -65,6 +69,8 @@ cache = PassageCache()
 
 manager = QuotationManager( DEFAULT_PROVIDER, cache )
 
+scripture_lock = threading.RLock()
+
 ###########################################################################
 # Utility
 ###########################################################################
@@ -90,9 +96,10 @@ def fetch_scripture():
             f"No Scripture available for {manager.get_reference()} "
             f"({manager.get_version()})."
         )
-
     
     if not already_cached:
+        save_scripture_history(manager)
+
         print(
             f"Success! Scripture for {manager.get_reference()} "
             f"({manager.get_version()}) fetched."
@@ -120,31 +127,33 @@ def home():
 @app.route("/scripture")
 def scripture():
 
-    try:
-        return jsonify(fetch_scripture())
+    with scripture_lock:
+        
+        try:
+            return jsonify(fetch_scripture())
 
-    except BibleProviderError as exc:
-        if manager.get_reference():
-            app.logger.warning("%s", exc)
-        return jsonify(
-            {
-                "reference": manager.get_reference(),
-                "version": manager.get_version(),
-                "verses": [],
-                "error": str(exc)
-            }
-        ), 500
+        except BibleProviderError as exc:
+            if manager.get_reference():
+                app.logger.warning("%s", exc)
+            return jsonify(
+                {
+                    "reference": manager.get_reference(),
+                    "version": manager.get_version(),
+                    "verses": [],
+                    "error": str(exc)
+                }
+            ), 500
 
-    except Exception as exc:
-        # app.logger.exception("Unexpected error while retrieving Scripture")
-        return jsonify(
-            {
-                "reference": manager.get_reference(),
-                "version": manager.get_version(),
-                "verses": [],
-                "error": str(exc)
-            }
-        ), 500
+        except Exception as exc:
+            # app.logger.exception("Unexpected error while retrieving Scripture")
+            return jsonify(
+                {
+                    "reference": manager.get_reference(),
+                    "version": manager.get_version(),
+                    "verses": [],
+                    "error": str(exc)
+                }
+            ), 500
 
 
 ###########################################################################
@@ -184,6 +193,108 @@ def reload():
 
         }
     )
+
+
+###########################################################################
+
+@app.get("/scripture/history")
+def scripture_history():
+    from fetch_history import HISTORY_FILE
+
+    if not HISTORY_FILE.exists():
+        return jsonify([])
+
+    with HISTORY_FILE.open("r", encoding="utf-8") as f:
+        history = json.load(f)
+
+    return jsonify(history)
+
+
+
+###########################################################################
+
+@app.get("/scripture/navigation")
+def scripture_navigation_status():
+    return jsonify(navigation.status())
+
+
+@app.post("/scripture/navigation")
+def navigate_scripture():
+
+    data = request.get_json(silent=True) or {}
+    direction = data.get("direction")
+
+    if direction not in ("back", "forward"):
+        return jsonify({
+            "success": False,
+            "error": "Direction must be 'back' or 'forward'."
+        }), 400
+
+    step = -1 if direction == "back" else 1
+
+    with scripture_lock:
+
+        entry = navigation.target(step)
+
+        if entry is None:
+            return jsonify({
+                "success": False,
+                "error": "No Scripture available in that direction."
+            }), 409
+
+        previous = {
+            "provider": manager.get_provider_name(),
+            "reference": manager.get_reference(),
+            "version": manager.get_version()
+        }
+
+        try:
+            # Restore the previous or next Scripture.
+            manager.set(
+                entry["provider"],
+                entry["reference"],
+                entry["version"]
+            )
+
+            # Retrieve the Scripture from cache or provider.
+            passage = fetch_scripture()
+
+            if not passage:
+                raise BibleProviderError(
+                    "Unable to restore the selected Scripture."
+                )
+
+            # Commit navigation only after successful restoration.
+            result = navigation.advance(step)
+
+            if result is None:
+                raise RuntimeError(
+                    "Navigation position could not be updated."
+                )
+
+        except Exception as error:
+
+            # Restore the original selection on failure.
+            try:
+                manager.set(
+                    previous["provider"],
+                    previous["reference"],
+                    previous["version"]
+                )
+            except Exception:
+                app.logger.exception(
+                    "Failed to restore the previous selection."
+                )
+
+            return jsonify({
+                "success": False,
+                "error": str(error)
+            }), 502
+
+        return jsonify({
+            "success": True,
+            **result
+        })
 
 
 ###########################################################################
@@ -279,30 +390,77 @@ def select():
         providers=manager.get_providers()
     )
 
+
 @app.route("/select", methods=["POST"])
 def update_selection():
 
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
 
-    reference = data["reference"]
+    reference = data.get("reference")
+    version = data.get("version")
+    provider = data.get("provider")
 
-    version = data["version"]
+    if not all([reference, version, provider]):
+        return jsonify({
+            "success": False,
+            "error": "Provider, reference and version are required."
+        }), 400
 
-    provider = data["provider"]
+    with scripture_lock:
 
-    manager.set( provider, reference, version )
+        # Save the current selection so it can be restored on failure.
+        previous = {
+            "provider": manager.get_provider_name(),
+            "reference": manager.get_reference(),
+            "version": manager.get_version()
+        }
 
-    return jsonify({
+        try:
+            # Set the requested Scripture.
+            manager.set(provider, reference, version)
 
-        "success": True,
+            # Confirm that Scripture can actually be retrieved.
+            # This also records a genuine cache miss in fetch_history.
+            passage = fetch_scripture()
 
-        "provider" : manager.get_provider_name(),
+            if not passage:
+                raise BibleProviderError(
+                    "Scripture retrieval returned no passage."
+                )
 
-        "reference": manager.get_reference(),
+            # Only record successful Scripture selections.
+            navigation.record(
+                manager.get_provider_name(),
+                manager.get_reference(),
+                manager.get_version()
+            )
 
-        "version": manager.get_version()
+        except Exception as error:
 
-    })
+            # Restore the previous selection.
+            try:
+                manager.set(
+                    previous["provider"],
+                    previous["reference"],
+                    previous["version"]
+                )
+            except Exception:
+                app.logger.exception(
+                    "Unable to restore previous Scripture selection"
+                )
+
+            return jsonify({
+                "success": False,
+                "error": str(error)
+            }), 502
+
+        return jsonify({
+            "success": True,
+            "provider": manager.get_provider_name(),
+            "reference": manager.get_reference(),
+            "version": manager.get_version()
+        })
+
 
 
 SCENE_DIR = Path(app.static_folder) / "images"

@@ -1,0 +1,408 @@
+[
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "John 3:16",
+        "version": "KJV",
+        "time": "2026-10-12T12:50:33.538400+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "John 3:16",
+        "version": "KJV",
+        "time": "2026-10-12T12:58:55.079845+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "John 3:16",
+        "version": "MSG",
+        "time": "2026-10-12T12:59:19.309130+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "Gen 1:26",
+        "version": "KJV",
+        "time": "2026-10-18T14:03:46.541223+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "Psa 8:4",
+        "version": "KJV",
+        "time": "2026-10-18T14:05:13.496757+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "Psa 8:5",
+        "version": "KJV",
+        "time": "2026-10-18T14:05:34.889855+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "Psa 8:5",
+        "version": "KJV",
+        "time": "2026-10-18T14:05:35.143049+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "Psa 82:5",
+        "version": "KJV",
+        "time": "2026-10-18T14:06:17.910467+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "Psa 82:5",
+        "version": "KJV",
+        "time": "2026-10-18T14:06:18.077453+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "Psa 82:5-6",
+        "version": "KJV",
+        "time": "2026-10-18T14:06:26.670535+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "Psa 82:5-6",
+        "version": "KJV",
+        "time": "2026-10-18T14:06:26.792909+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "John 10:34",
+        "version": "KJV",
+        "time": "2026-10-18T14:07:03.113997+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "John 10:35",
+        "version": "KJV",
+        "time": "2026-10-18T14:07:27.564448+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "matt 4:8",
+        "version": "KJV",
+        "time": "2026-10-18T14:08:49.783200+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "matt 4:9",
+        "version": "KJV",
+        "time": "2026-10-18T14:09:13.341578+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "matt 4:10",
+        "version": "KJV",
+        "time": "2026-10-18T14:09:43.814221+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "matt 4:10",
+        "version": "KJV",
+        "time": "2026-10-18T14:09:44.233473+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "2 Cor 5:17",
+        "version": "KJV",
+        "time": "2026-10-18T14:11:42.371819+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "Jn 3:3",
+        "version": "KJV",
+        "time": "2026-10-18T14:12:35.614148+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "Jn 3:4",
+        "version": "KJV",
+        "time": "2026-10-18T14:12:56.606867+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "Jn 3:5",
+        "version": "KJV",
+        "time": "2026-10-18T14:14:06.377321+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "1 Cor 6:19",
+        "version": "KJV",
+        "time": "2026-10-18T14:14:40.508004+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "1 Cor 6:20",
+        "version": "KJV",
+        "time": "2026-10-18T14:15:32.597923+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "Prov 20:27",
+        "version": "KJV",
+        "time": "2026-10-18T14:16:07.836654+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "rom 8:11",
+        "version": "KJV",
+        "time": "2026-10-18T14:19:33.290106+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "jn 4:23-24",
+        "version": "KJV",
+        "time": "2026-10-18T14:22:57.566210+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "lk 10:21",
+        "version": "KJV",
+        "time": "2026-10-18T14:24:10.631800+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "jn 11:33",
+        "version": "KJV",
+        "time": "2026-10-18T14:25:34.745555+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "1 cor 14:2",
+        "version": "KJV",
+        "time": "2026-10-18T14:28:14.641334+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "1 cor 14:14",
+        "version": "KJV",
+        "time": "2026-10-18T14:28:59.581408+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "1 cor 14:14",
+        "version": "KJV",
+        "time": "2026-10-18T14:28:59.873140+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "1 cor 2:9-12",
+        "version": "KJV",
+        "time": "2026-10-18T14:32:26.082154+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "1 cor 2:11",
+        "version": "KJV",
+        "time": "2026-10-18T14:33:35.707230+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "1 jn 2:20",
+        "version": "KJV",
+        "time": "2026-10-18T14:35:53.074015+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "1 jn 2:27",
+        "version": "KJV",
+        "time": "2026-10-18T14:36:10.757712+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "job 32:8",
+        "version": "KJV",
+        "time": "2026-10-18T14:37:50.149676+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "Lk 2:40",
+        "version": "KJV",
+        "time": "2026-10-18T14:41:21.196662+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "2 cor 5:14",
+        "version": "KJV",
+        "time": "2026-10-18T14:43:09.613743+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "2 cor 5:15",
+        "version": "KJV",
+        "time": "2026-10-18T14:45:37.497935+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "2 cor 5:15",
+        "version": "KJV",
+        "time": "2026-10-18T14:45:37.566171+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "2 cor 5:16",
+        "version": "KJV",
+        "time": "2026-10-18T14:45:40.868008+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "2 cor 5:16",
+        "version": "KJV",
+        "time": "2026-10-18T14:45:41.172011+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "hab 3:17",
+        "version": "KJV",
+        "time": "2026-10-18T14:52:32.885609+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "hab 3:17-18",
+        "version": "KJV",
+        "time": "2026-10-18T14:52:55.276521+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "gal 5:16",
+        "version": "KJV",
+        "time": "2026-10-18T14:54:49.963215+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "gal 5:17",
+        "version": "KJV",
+        "time": "2026-10-18T14:54:58.857682+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "gal 5:18",
+        "version": "KJV",
+        "time": "2026-10-18T14:55:07.269094+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "gal 5:19",
+        "version": "KJV",
+        "time": "2026-10-18T14:55:44.529166+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "gal 5:19",
+        "version": "KJV",
+        "time": "2026-10-18T14:55:44.597401+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "gal 5:19",
+        "version": "KJV",
+        "time": "2026-10-18T16:03:15.439526+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "John 3:16",
+        "version": "KJV",
+        "time": "2026-10-20T01:08:45.879001+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "matt 18",
+        "version": "KJV",
+        "time": "2026-10-20T01:08:57.114450+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "col 3:18",
+        "version": "GNT",
+        "time": "2026-10-20T01:09:35.123821+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "col 3:15-19",
+        "version": "KJV",
+        "time": "2026-10-20T01:10:03.550587+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "col 3:15-19",
+        "version": "MSG",
+        "time": "2026-10-20T01:10:39.339664+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "Ps 112:1-2",
+        "version": "KJV",
+        "time": "2026-10-20T01:12:56.317846+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "col 3",
+        "version": "KJV",
+        "time": "2026-10-20T01:14:29.762679+02:00"
+    },
+    {
+        "success": true,
+        "provider": "biblegateway",
+        "reference": "phil 4:18",
+        "version": "KJV",
+        "time": "2026-10-20T01:14:44.570557+02:00"
+    }
+]

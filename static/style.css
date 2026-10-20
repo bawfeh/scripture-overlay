@@ -234,3 +234,32 @@ body{
     background:transparent;
 
 }
+
+/*---------------------------------------------
+    Scripture History
+---------------------------------------------*/
+
+.history-control {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+}
+
+.history-control button {
+    flex: 1;
+    height: var(--control-height);
+    font-size: var(--button-size);
+    cursor: pointer;
+}
+
+.history-control button:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+#history-status {
+    margin-top: 10px;
+    text-align: center;
+    font-size: var(--label-size);
+    color: #bbb;
+}

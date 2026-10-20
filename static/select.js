@@ -296,6 +296,9 @@ submit.onclick = async function()
                 result.error || "Unable to update Scripture."
             );
 
+        // Refresh Previous and Next buttons after successful update
+        await refreshHistoryControls();
+
         alert(
             `Reference Updated to\n\n${result.reference} ` +
             `(${result.version})\n${result.provider}`
@@ -429,3 +432,81 @@ applySceneButton.addEventListener("click", async () => {
 });
 
 loadScenes();
+
+/***************************************************************
+ * History navigation
+ ***************************************************************/
+
+const historyBack = document.getElementById("history-back");
+const historyForward = document.getElementById("history-forward");
+const historyStatus = document.getElementById("history-status");
+
+let historyBusy = false;
+
+async function refreshHistoryControls() {
+    const response = await fetch("/scripture/navigation", {
+        cache: "no-store"
+    });
+
+    if (!response.ok) {
+        throw new Error("Unable to retrieve Scripture history");
+    }
+
+    const state = await response.json();
+
+    historyBack.disabled = historyBusy || !state.can_back;
+    historyForward.disabled = historyBusy || !state.can_forward;
+
+    historyStatus.textContent = state.total
+        ? `Scripture ${state.position + 1} of ${state.total}`
+        : "No Scripture history";
+}
+
+async function navigateHistory(direction) {
+    historyBusy = true;
+    historyBack.disabled = true;
+    historyForward.disabled = true;
+
+    try {
+        const response = await fetch("/scripture/navigation", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ direction })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || "Navigation failed");
+        }
+
+        const current = result.current;
+
+        providerBox.value = current.provider;
+        await loadVersions(current.provider);
+
+        referenceBox.value = current.reference;
+        versionBox.value = current.version;
+
+        refreshVerseNumbers();
+        updatePreview();
+    } catch (error) {
+        console.error(error);
+        alert(error.message);
+    } finally {
+        historyBusy = false;
+        await refreshHistoryControls();
+    }
+}
+
+historyBack.addEventListener("click", () => {
+    navigateHistory("back");
+});
+
+historyForward.addEventListener("click", () => {
+    navigateHistory("forward");
+});
+
+refreshHistoryControls().catch(console.error);
